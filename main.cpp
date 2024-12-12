@@ -5,23 +5,105 @@
 #include <regex>
 
 
+std::string CheckInstruction(std::string data);
+std::vector<std::pair<int, int>> GetNumbers(std::string data, int iteration);
+
 int main()
 {
 	std::ifstream io;
 	io.open("input.txt");
 	std::string data;
-	data.reserve(20000);
 
 	for (std::string line; std::getline(io, line);)
 	{
 		data.append(line);
 	}
 
-	//std::cout << data << std::endl;
+	std::vector<std::pair<int, int>> numbers;
 
-	std::size_t pos = 0;
-	std::string temp;
+	int i = 0;
+	numbers = GetNumbers(data, ++i);
+	
 
+	int totalNumber = 0;
+
+	for (auto n : numbers)
+	{
+		totalNumber += (n.first * n.second);
+	}
+
+	std::cout << "All mul() results: " << totalNumber << "\n\n";
+
+	std::string newData = CheckInstruction(data);
+
+	numbers = GetNumbers(newData, ++i);
+
+	totalNumber = 0;
+
+	for (auto n : numbers)
+	{
+		totalNumber += (n.first * n.second);
+	}
+
+	std::cout << "All do() mul() results: " << totalNumber << "\n\n";
+}
+
+std::string CheckInstruction(std::string data)
+{
+	std::size_t end = data.size();
+	std::size_t doPos = 0;
+	std::size_t dnPos = 0;
+	std::vector<std::string> temp;
+	std::string string;
+
+	std::ofstream output;
+	output.open("output.txt");
+
+	while (end != std::string::npos)
+	{
+		doPos = data.rfind("do()", end);
+		dnPos = data.rfind("don't()", end);
+
+		if (end - doPos < end - dnPos)
+		{
+			string = data.substr(doPos, (end - doPos) + 1);
+			temp.push_back(string);
+			//std::cout << string << std::endl;
+			output << string << std::endl;
+			end = doPos - 1;
+		}
+		else
+		{
+			end = dnPos - 1;
+		}
+		if (doPos == std::string::npos && dnPos == std::string::npos)
+		{
+			doPos = data.find("do()", 0);
+			dnPos = data.find("don't()", 0);
+
+			if (doPos < dnPos)
+			{
+				string = data.substr(0, doPos);
+				temp.push_back(string);
+				output << string << std::endl;
+				break;
+			}
+			else break;
+		}
+	}
+
+	string.clear();
+
+	for (auto s : temp)
+	{
+		string.append(s);
+	}
+
+	return string;
+}
+
+std::vector<std::pair<int, int>> GetNumbers(std::string data, int iteration)
+{
 	std::vector<std::pair<int, int>> numbers;
 	std::pair<int, int> number;
 
@@ -57,12 +139,17 @@ int main()
 		numbers.push_back(number);
 	}
 
-	int totalNumber = 0;
+	std::string file;
 
-	for (auto n : numbers)
+	file.append("mul").append(std::to_string(iteration)).append(".txt");
+	std::ofstream output(file);
+	for (auto s : commands)
 	{
-		totalNumber += (n.first * n.second);
+		output << s << std::endl;
 	}
+	
 
-	std::cout << "All mul() results: " << totalNumber;
+	output.close();
+
+	return numbers;
 }
